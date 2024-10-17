@@ -27,19 +27,31 @@ export async function pdf2png(
       pagesToProcess: [1], // PDF should only have one page
       verbosityLevel: 1,
       disableFontFace: false,
-      useSystemFonts: false,
+      useSystemFonts: true,
       enableXfa: true,
       strictPagesToProcess: true,
     });
     console.timeEnd("pdfConvert");
     if (pngPages.length > 0) {
       const pngPage = pngPages[0];
-      
+      const etag = Buffer.from(pdfUrl).toString('base64');
+      const ifNoneMatch = request.headers.get('if-none-match');
+      if (ifNoneMatch === etag) {
+        return {
+          status: 304, // Not Modified
+          headers: {
+            "ETag": etag,
+            "Cache-Control": "public, max-age=3600", // Cache for 1 hour
+          },
+        };
+      }
       return {
         body: pngPage.content,
         headers: {
           "Content-Type": "image/png",
           "Content-Disposition": `inline; filename="${pdfUrl.split('/').pop()?.replace('.pdf', '.png') || 'converted.png'}"`,
+          "Cache-Control": "public, max-age=3600", // Cache for 1 hour
+          "ETag": etag,
         },
       };
     } else {
