@@ -26,8 +26,8 @@ export async function pdf2png(
       viewportScale: parseFloat(process.env["VIEWPORT_SCALE"] ?? "5.0"), 
       pagesToProcess: [1], // PDF should only have one page
       verbosityLevel: 1,
-      disableFontFace: false,
-      useSystemFonts: true,
+      disableFontFace: true,
+      useSystemFonts: false,
       enableXfa: true,
       strictPagesToProcess: true,
     });
